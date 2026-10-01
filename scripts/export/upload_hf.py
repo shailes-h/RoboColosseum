@@ -41,6 +41,7 @@ def add_eval_files(model, run, task, put):
         txt = (ROOT / "configs/lingbot/robot_configs/yam.yaml").read_text()
         txt = re.sub(r"(?m)^norm_stats: .*$", "norm_stats: norm_stats.json  # the norm_stats.json in this folder", txt)
         put(txt.encode(), f"robot_config_yam_{t}.yaml")
+        put(run / "lingbotvla_cli.yaml", "lingbotvla_cli.yaml")  # full training CLI config (the loader reads it)
     elif model == "pi05":  # standalone TrainConfig (configs/openpi/yam.py without the runtime registration)
         txt = (ROOT / "configs/openpi/yam.py").read_text()
         txt = txt.replace('TASK = os.environ.get("TASK", "Dustpan")', f'TASK = "{task}"')
