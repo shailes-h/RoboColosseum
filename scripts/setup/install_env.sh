@@ -31,8 +31,7 @@ case "$NAME" in
       && uv pip install --python "$V/bin/python" -e . \
       && "$V/bin/python" -c "import openpi, jax; print('OK openpi', jax.__version__)";;
   molmoact2)
-    git -C "$RC_TP/molmoact2" submodule update --init --recursive \
-      && cd "$RC_TP/molmoact2/experiments" && uv venv --clear --python 3.12 "$V" \
+    cd "$RC_TP/molmoact2/experiments" && uv venv --clear --python 3.12 "$V" \
       && uv pip install --python "$V/bin/python" -e ".[all]" \
       && uv pip install --index-strategy unsafe-best-match --python "$V/bin/python" -e "./lerobot[async]" debugpy "protobuf==6.33.5" "nvidia-npp-cu12>=12.4" \
       && "$V/bin/python" -c "import torch, olmo; print('OK molmoact2', torch.__version__)";;
