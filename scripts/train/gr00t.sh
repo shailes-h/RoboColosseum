@@ -1,6 +1,6 @@
 #!/bin/bash
 # GR00T N1.7 (nvidia/GR00T-N1.7-3B) fine-tune on <EMBODIMENT>/<TASK>_joint_v21_gr00t.
-# usage: bash scripts/train/gr00t.sh <gpu_ids> <per_gpu_bs>        e.g.  bash scripts/train/gr00t.sh 0,1,2,3 16
+# usage: bash scripts/train/gr00t.sh <gpu_ids> <per_gpu_bs> [extra trainer args...]        e.g.  bash scripts/train/gr00t.sh 0,1,2,3 16
 #   env: EPOCHS=5  ACC=1 (grad accumulation)  FULL_VLM=1 (also tune LLM + vision; 0 = repo default: action head only)
 #        LR_MULT=1  RUN_SUFFIX=  RUN=
 # Recipe (launch_finetune defaults): GBS 64 @ LR 1e-4, cosine, 5% warmup. LR scaled linearly with GBS (x LR_MULT).
@@ -20,5 +20,5 @@ cd "$RC_TP/Isaac-GR00T"
   --max-steps $STEPS --save-steps $SAVE --save-total-limit $KEEP \
   --global-batch-size $((BS * NGPU)) --gradient-accumulation-steps $ACC --learning-rate $LR --dataloader-num-workers 8 \
   --color-jitter-params brightness 0.3 contrast 0.4 saturation 0.5 hue 0.08 \
-  --use-wandb --wandb-project "$WANDB_PROJECT" $TUNE
+  --use-wandb --wandb-project "$WANDB_PROJECT" $TUNE "${@:3}"
 echo EXIT=$?

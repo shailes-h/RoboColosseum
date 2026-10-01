@@ -1,6 +1,6 @@
 #!/bin/bash
 # G0.5 (OpenGalaxea/G05 g05-base) full fine-tune on <EMBODIMENT>/<TASK>_galaxea. Task "yam" (configs/galaxea/).
-# usage: bash scripts/train/g05.sh <gpu_ids> [per_gpu_bs=8]        e.g.  bash scripts/train/g05.sh 0,1,2,3 8
+# usage: bash scripts/train/g05.sh <gpu_ids> [per_gpu_bs=8] [extra trainer args...]        e.g.  bash scripts/train/g05.sh 0,1,2,3 8
 #   env: EPOCHS=5  RUN_SUFFIX=  RUN=
 # Recipe (R1Lite post-training): LR 4e-5 at 8/GPU, cosine, warmup 200, wd 0.03. Per-GPU batch = recipe default, so the
 # LR is not scaled. FSDP (repo option) is needed to fit full fine-tuning on 80GB GPUs.
@@ -20,5 +20,5 @@ python -m torch.distributed.run --standalone --nnodes 1 --nproc-per-node $NGPU s
   model.model_arch.hf_processor_path=$G05/qwen3_5_2b_base_processor \
   tokenizer.vq_config.ckpt_dir=$G05/action_tokenizer.pt \
   use_fsdp=true model.batch_size=$BS model.max_epochs=$EPOCHS \
-  logger.mode=online logger.project=$WANDB_PROJECT ${WANDB_ENTITY:+logger.workspace=$WANDB_ENTITY} logger.experiment_name=$RUN
+  logger.mode=online logger.project=$WANDB_PROJECT ${WANDB_ENTITY:+logger.workspace=$WANDB_ENTITY} logger.experiment_name=$RUN "${@:3}"
 echo EXIT=$?

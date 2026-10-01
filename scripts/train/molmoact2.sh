@@ -1,6 +1,6 @@
 #!/bin/bash
 # MolmoAct2 (allenai/MolmoAct2 base) full fine-tune on <EMBODIMENT>/<TASK>_joint. Mixture "yam" (configs/molmoact2/train.py).
-# usage: bash scripts/train/molmoact2.sh <gpu_ids> [per_gpu_bs=32]   e.g.  bash scripts/train/molmoact2.sh 0,1,2,3 32
+# usage: bash scripts/train/molmoact2.sh <gpu_ids> [per_gpu_bs=32] [extra trainer args...]   e.g.  bash scripts/train/molmoact2.sh 0,1,2,3 32
 #   env: EPOCHS=5  RUN_SUFFIX=  RUN=
 # Recipe (experiments/README.md "Full Fine-Tuning"): GBS 64; LR llm 1e-5, vit 5e-6, connector 5e-6, action expert 5e-5;
 # warmup 200; decay to 0.1x. All LRs scaled linearly with GBS. Checkpoints are FSDP shards, one per epoch;
@@ -22,5 +22,5 @@ cd "$RC_TP/molmoact2/experiments"
   --packing=false --dynamic_seq_len=true \
   --ft_vlm=true --ft_action_expert=true --ft_embedding=lm_head --lora_enable=false \
   --llm_learning_rate=$(scale 1e-5 64) --vit_learning_rate=$(scale 5e-6 64) \
-  --connector_learning_rate=$(scale 5e-6 64) --action_expert_learning_rate=$(scale 5e-5 64)
+  --connector_learning_rate=$(scale 5e-6 64) --action_expert_learning_rate=$(scale 5e-5 64) "${@:3}"
 echo EXIT=$?
