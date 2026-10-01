@@ -16,6 +16,9 @@ D=$RC_DATA/$EMBODIMENT; RAW=$D/$TASK
 [ -f "$RAW/meta/info.json" ] || { echo "missing $RAW; run datasets/$EMBODIMENT/download.sh first"; exit 1; }
 [ -x "$PY" ] || { echo "missing tools env; run scripts/setup/install_env.sh tools"; exit 1; }
 
+echo "== 0/4 check video metadata against the video files"
+$PY $T/check_videos.py "$RAW" || { echo "video metadata does not match the video files; fix the dataset first"; exit 1; }
+
 echo "== 1/4 ${TASK}_joint (joint-space v3.0)"
 $PY $T/make_joint_dataset.py "$RAW" "$D/${TASK}_joint"
 

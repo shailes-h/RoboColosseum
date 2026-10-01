@@ -34,5 +34,7 @@ Each VLA's loader expects a different layout. Rather than patch the loaders, we 
 | `Dustpan_joint_v21` | v2.1 | pi0.5 (openpi) | `Dustpan_joint` converted with GR00T's `scripts/lerobot_conversion/convert_v3_to_v2.py` |
 | `Dustpan_joint_v21_gr00t` | v2.1 | GR00T N1.7 | top camera letterboxed 360x640 → 480x640 (GR00T stacks views, so they must share a size; AV1 re-encode with LeRobot settings), plus `meta/modality.json` from `configs/gr00t/yam_modality.json` |
 
-The converters live in `scripts/data/` (`make_joint_dataset.py`, `make_galaxea_dataset.py`, `pad_video.py`).
+The converters live in `scripts/data/` (`make_joint_dataset.py`, `make_galaxea_dataset.py`, `pad_video.py`). `convert.sh` first runs
+`check_videos.py`, which verifies that each video file holds exactly the frames its episodes claim. It caught a mislabeled
+`file_index` in Microwave (top camera, episodes 22-75), fixed on the Hub on 2026-10-01.
 Symlinks are relative, so the whole `BimanualYAM/` tree can be copied with `cp -a`.
