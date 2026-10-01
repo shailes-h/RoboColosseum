@@ -11,7 +11,7 @@ LR=$(scale 5e-5 256)
 echo "RUN=$RUN GBS=$GBS LR=$LR STEPS=$STEPS SAVE_EVERY=$SAVE"
 source "$(dirname "$0")/lingbot_env.sh"
 bash train.sh tasks/vla/train_lingbotvla.py "$CFG" \
-  --data.norm_stats_file "$RC_OUTPUTS/norm_stats/lingbot/yam.json" \
+  --data.norm_stats_file "$RC_OUTPUTS/norm_stats/lingbot/yam_${TASK}.json" \
   --train.output_dir "$OUT" --train.micro_batch_size $BS --train.global_batch_size $GBS \
   --train.lr $LR --train.max_steps $STEPS --train.save_steps $SAVE \
   --train.enable_fp32 false --train.enable_mixed_precision true \

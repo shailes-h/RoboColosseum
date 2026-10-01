@@ -48,4 +48,4 @@ images:
   - observation.images.camera_wrist_right: 
       origin_keys: observation.images.right
 
-norm_stats: ${RC_OUTPUTS}/norm_stats/lingbot/yam.json
+norm_stats: ${RC_OUTPUTS}/norm_stats/lingbot/yam_${TASK}.json
