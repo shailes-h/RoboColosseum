@@ -37,7 +37,8 @@ case "$NAME" in
     cd "$RC_TP/molmoact2/experiments" && uv venv --clear --python 3.12 "$V" \
       && uv pip install --python "$V/bin/python" -e ".[all]" \
       && uv pip install --index-strategy unsafe-best-match --python "$V/bin/python" -e "./lerobot[async]" debugpy "nvidia-npp-cu12>=12.4" \
-      && "$V/bin/python" -c "import torch, olmo; print('OK molmoact2', torch.__version__)";;
+      && uv pip install --python "$V/bin/python" --no-deps "protobuf==6.33.5" `# google *_pb2 need >=6.33; lerobot pins <6.32 but works` \
+      && "$V/bin/python" -c "import torch, olmo, cached_path; print('OK molmoact2', torch.__version__)";;
   g05)
     # `uv sync` rewrites the repo's uv.lock; restore it so the submodule stays pristine.
     cd "$RC_TP/GalaxeaVLA" && UV_PROJECT_ENVIRONMENT=$V uv sync --index-strategy unsafe-best-match; rc=$?
