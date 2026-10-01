@@ -90,6 +90,26 @@ The aim is a fair comparison, so every model gets the same treatment:
 | π0.5 | `pi05_aloha_pen_uncap` (GBS 64, 2.5e-5 cosine, EMA 0.99) | 64 | 2.5e-5 | `adapt_to_pi=False` (YAM is not Aloha) |
 | LingBot-VLA v2 | `configs/vla/real_robot/real_robot.yaml` (GBS 256, 5e-5 const, Muon) | 64 | 1.25e-5 | resumes automatically from the latest checkpoint |
 
+## Training record
+
+### BimanualYAM / Dustpan (101 episodes, 55,046 frames)
+
+All runs used crane6 with 4x H100 80GB for 5 epochs, with one checkpoint per epoch kept in `outputs/`. The final-epoch
+inference weights are published on HF under `<model>/dustpan/`.
+
+| VLA | Per-GPU BS x GPUs = GBS | Peak LR | Optimizer steps | Wall time | Loss (start → end) | Run dir (`outputs/`) | W&B |
+|---|---|---|---|---|---|---|---|
+| GR00T N1.7 (full VLM) | 16 x 4 = 64 | 1e-4, cosine, 5% warmup | 4,301 | ~1.5h | 1.18 → 0.022 | `gr00t/gr00t-dustpan-crane6-gbs64-fullvlm` | [rt2lpui6](https://wandb.ai/shaileshxml-nus/RoboColosseum/runs/rt2lpui6) |
+| π0.5 | 16 x 4 = 64 | 2.5e-5 → 2.5e-6 cosine, 1k warmup, EMA 0.99 | 4,300 | 2h08m | 0.117 → 0.0018 | `pi05/pi05_yam/pi05-dustpan-crane6-gbs64` | [3quncp8r](https://wandb.ai/shaileshxml-nus/RoboColosseum/runs/3quncp8r) |
+| G0.5 | 8 x 4 = 32 | 4e-5, cosine, 200 warmup, wd 0.03 | 8,520 | 3h11m | 6.6 → 0.56 | `g05/yam/g05-dustpan-crane6-gbs32` | – |
+| MolmoAct2 | 32 x 4 = 128 | LLM 2e-5, ViT/connector 1e-5, action expert 1e-4 | 2,151 | ~4h37m | flow loss 0.049 → 0.007 | `molmoact2/molmoact2-dustpan-crane6-gbs128` | [qecaa9le](https://wandb.ai/shaileshxml-nus/RoboColosseum/runs/qecaa9le) |
+| LingBot-VLA v2 | 16 x 4 = 64 | 1.25e-5 constant, Muon | 4,301 | ~4.6h | 0.81 → 0.027 (action 0.79 → 0.022) | `lingbot/lingbot-dustpan-crane6-gbs64` | [fzrlfbzj](https://wandb.ai/shaileshxml-nus/RoboColosseum/runs/fzrlfbzj) + [v6gmd98p](https://wandb.ai/shaileshxml-nus/RoboColosseum/runs/v6gmd98p) (resumed after a node failure) |
+
+Notes:
+- **GR00T:** an earlier GR00T run (action head only, GBS 512, 538 steps) plateaued at loss ~1.0, the
+  constant-prediction level. GR00T needs thousands of optimizer updates, which is why GBS 64 is used.
+- **Run names:** they predate this repo's naming, so the run dirs above don't match the current `<model>-<embodiment>-<task>-gbs<N>` names.
+
 ## How the repos are kept untouched
 
 | VLA | Mechanism |
