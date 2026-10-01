@@ -1,0 +1,51 @@
+# RoboColosseum BimanualYAM (<TASK>_joint), from robotwin.yaml. Template, see ../yam.yaml; arm subtract_state per real-robot guidance.
+states:
+  - observation.state.arm.position:
+      origin_keys:
+        - observation.state:
+            start: 0
+            end: 6
+        - observation.state:
+            start: 7
+            end: 13
+
+  - observation.state.effector.position: 
+      origin_keys:
+        - observation.state:
+            start: 6
+            end: 7
+        - observation.state:
+            start: 13
+            end: 14
+
+actions:
+  - action.arm.position: 
+      origin_keys:
+          - action:
+              start: 0
+              end: 6
+          - action:
+              start: 7
+              end: 13
+      subtract_state: True
+      relative_type: joint  # plain action - state (default 'quaternion_local' is for EE poses only)
+
+  - action.effector.position: 
+      origin_keys:
+          - action:
+              start: 6
+              end: 7
+          - action:
+              start: 13
+              end: 14
+      subtract_state: False
+  
+images:
+  - observation.images.camera_top: 
+      origin_keys: observation.images.top
+  - observation.images.camera_wrist_left: 
+      origin_keys: observation.images.left
+  - observation.images.camera_wrist_right: 
+      origin_keys: observation.images.right
+
+norm_stats: ${RC_OUTPUTS}/norm_stats/lingbot/yam.json

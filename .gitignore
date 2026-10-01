@@ -1,0 +1,8 @@
+env.local.sh
+.envs/
+outputs/
+wandb/
+__pycache__/
+*.pyc
+# dataset contents are downloaded/generated; only READMEs and scripts are tracked
+datasets/*/*/
