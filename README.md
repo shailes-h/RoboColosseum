@@ -38,11 +38,12 @@ outputs/               checkpoints, norm stats, rendered configs (gitignored)
 ## Quick start
 
 Requirements: Linux, NVIDIA GPUs with CUDA 12 drivers (we used 4x H100 80GB), [uv](https://docs.astral.sh/uv/),
-conda (LingBot only), the `hf` CLI (`pip install -U huggingface_hub`), and logins: `hf auth login`, `wandb login`.
+conda (LingBot only), git-lfs (GR00T's lockfile references LFS wheels), the `hf` CLI (`pip install -U huggingface_hub`), and logins: `hf auth login`, `wandb login`.
 
 ```bash
 git clone --recursive <this repo> RoboColosseum && cd RoboColosseum
 # (already cloned?)  git submodule update --init
+git -C third_party/Isaac-GR00T lfs pull   # if git-lfs was not active during the clone
 
 cp env.local.sh.example env.local.sh       # optional: fast local disks, W&B entity, conda path, flash-attn wheel
 

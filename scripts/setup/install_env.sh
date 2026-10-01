@@ -23,6 +23,9 @@ case "$NAME" in
       && uv pip install --python "$V/bin/python" -e "$RC_TP/Isaac-GR00T/scripts/lerobot_conversion" av pyarrow numpy \
       && "$V/bin/python" -c "import av, pyarrow, lerobot; print('OK tools')";;
   gr00t)
+    # uv.lock references wheels stored in git-LFS; they must be real files, not LFS pointers.
+    if grep -lq "git-lfs.github.com/spec" "$RC_TP"/Isaac-GR00T/scripts/deployment/dgpu/wheels/*.whl 2>/dev/null; then
+      echo "Isaac-GR00T LFS wheels missing: run  git -C third_party/Isaac-GR00T lfs pull  (needs git-lfs)"; exit 1; fi
     cd "$RC_TP/Isaac-GR00T" && UV_PROJECT_ENVIRONMENT=$V uv sync --python 3.12 \
       && "$V/bin/python" -c "import gr00t, torch; print('OK gr00t', torch.__version__)";;
   openpi)
@@ -33,7 +36,7 @@ case "$NAME" in
   molmoact2)
     cd "$RC_TP/molmoact2/experiments" && uv venv --clear --python 3.12 "$V" \
       && uv pip install --python "$V/bin/python" -e ".[all]" \
-      && uv pip install --index-strategy unsafe-best-match --python "$V/bin/python" -e "./lerobot[async]" debugpy "protobuf==6.33.5" "nvidia-npp-cu12>=12.4" \
+      && uv pip install --index-strategy unsafe-best-match --python "$V/bin/python" -e "./lerobot[async]" debugpy "nvidia-npp-cu12>=12.4" \
       && "$V/bin/python" -c "import torch, olmo; print('OK molmoact2', torch.__version__)";;
   g05)
     # `uv sync` rewrites the repo's uv.lock; restore it so the submodule stays pristine.
