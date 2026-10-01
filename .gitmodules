@@ -13,3 +13,4 @@
 [submodule "third_party/lingbot-vla-v2"]
 	path = third_party/lingbot-vla-v2
 	url = https://github.com/robbyant/lingbot-vla-v2
+	ignore = untracked
