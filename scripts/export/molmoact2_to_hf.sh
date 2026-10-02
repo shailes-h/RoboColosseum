@@ -5,5 +5,5 @@
 source "$(dirname "$0")/../../env.sh"
 CK=$(realpath "$1"); OUT=$(realpath -m "$2"); [ -n "$2" ] || { sed -n 2,4p "$0"; exit 1; }
 cd "$RC_TP/molmoact2/experiments"
-"$RC_ENVS/molmoact2/bin/python" olmo/hf_model/convert_molmoact2_to_hf.py "$CK" "$OUT"
+"$RC_ENVS/molmoact2/bin/python" -m olmo.hf_model.convert_molmoact2_to_hf "$CK" "$OUT"
 echo EXIT=$?
