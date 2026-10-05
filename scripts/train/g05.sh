@@ -6,7 +6,7 @@
 # LR is not scaled. FSDP (repo option) is needed to fit full fine-tuning on 80GB GPUs.
 # Needs: bash scripts/setup/download_models.sh g05
 source "$(dirname "$0")/common.sh" g05 "$1" "${2:-8}"
-G05=$(${HF_CLI:-hf} download OpenGalaxea/G05 --include "g05-base/*" "action_tokenizer.pt" "qwen3_5_2b_base_processor/*" --quiet)
+G05=$("$RC_ENVS/tools/bin/python" -c "from huggingface_hub import snapshot_download as s; print(s('OpenGalaxea/G05', allow_patterns=['g05-base/*', 'action_tokenizer.pt', 'qwen3_5_2b_base_processor/*']))" 2>/dev/null)
 echo "RUN=$RUN GBS=$GBS (base: $G05)"
 source "$RC_ENVS/g05/bin/activate"
 cd "$RC_TP/GalaxeaVLA"

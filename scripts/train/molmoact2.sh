@@ -8,7 +8,7 @@
 source "$(dirname "$0")/common.sh" molmoact2 "$1" "${2:-32}"
 echo "RUN=$RUN GBS=$GBS STEPS=$STEPS SAVE_EVERY=$SAVE"
 FF=$RC_ENVS/ffmpeg7/lib; NPP=$(ls -d "$RC_ENVS"/molmoact2/lib/python3*/site-packages/nvidia/npp/lib)
-export LEROBOT_DATA_ROOT=$RC_DATA MOLMO_DATA_DIR=$RC_CACHE/molmo_data LD_LIBRARY_PATH=$NPP:$FF:$LD_LIBRARY_PATH  # torchcodec needs FFmpeg 7
+export LEROBOT_DATA_ROOT=$RC_DATA MOLMO_DATA_DIR=$RC_CACHE/molmo_data LD_LIBRARY_PATH=$NPP:$FF:$LD_LIBRARY_PATH PATH=$RC_ENVS/ffmpeg7/bin:$PATH  # torchcodec needs FFmpeg 7 (libs + binary)
 export HF_ACCESS_TOKEN=${HF_ACCESS_TOKEN:-$(cat "${HF_HOME:-$HOME/.cache/huggingface}/token" 2>/dev/null)}
 export WANDB_API_KEY=${WANDB_API_KEY:-$(awk '/api.wandb.ai/{f=1} f&&/password/{print $2; exit}' ~/.netrc 2>/dev/null)}
 mkdir -p "$MOLMO_DATA_DIR"

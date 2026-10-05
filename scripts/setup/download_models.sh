@@ -7,7 +7,7 @@ HF=${HF_CLI:-hf}
 case "${1:-all}" in
   gr00t)     $HF download nvidia/GR00T-N1.7-3B;;
   molmoact2) $HF download allenai/MolmoAct2;;
-  g05)       $HF download OpenGalaxea/G05 --include "g05-base/*" "action_tokenizer.pt" "qwen3_5_2b_base_processor/*";;
+  g05)       "$RC_ENVS/tools/bin/python" -c "from huggingface_hub import snapshot_download as s; print(s('OpenGalaxea/G05', allow_patterns=['g05-base/*', 'action_tokenizer.pt', 'qwen3_5_2b_base_processor/*']))";;  # API: hf CLI >= 1.0 drops --include when it also sees a filename
   lingbot)   $HF download robbyant/lingbot-vla-v2-6b && $HF download Qwen/Qwen3-VL-4B-Instruct \
                && $HF download Ruicheng/moge-2-vitb-normal;;
   openpi)    # pi05_base lives on GCS; openpi caches it under $OPENPI_DATA_HOME (default ~/.cache/openpi) on first use.
