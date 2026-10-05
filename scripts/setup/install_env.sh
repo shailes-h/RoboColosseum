@@ -7,7 +7,7 @@
 #   molmoact2 MolmoAct2 experiments + its bundled lerobot                             uv, python 3.12
 #   g05       GalaxeaVLA / G0.5 (uv sync)                                             uv
 #   lingbot   LingBot-VLA v2 (repo's tools/create_train_env.sh)                       conda; set CONDA_SH, FLASH_ATTN_WHEEL
-#   ffmpeg7   FFmpeg 7 shared libs for torchcodec (MolmoAct2, LingBot)                conda
+#   ffmpeg7   FFmpeg 7 shared libs for torchcodec (openpi, MolmoAct2, LingBot)             conda
 # Needs: uv (https://docs.astral.sh/uv), conda for lingbot/ffmpeg7, CUDA 12 driver. Run on a compute node
 # with the target GPUs/glibc (envs are not portable across very different nodes).
 set -o pipefail

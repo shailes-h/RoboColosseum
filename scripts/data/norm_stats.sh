@@ -9,7 +9,7 @@ export CUDA_VISIBLE_DEVICES=${2:-0}
 case "$1" in
   openpi)
     cd "$RC_TP/openpi"
-    HF_LEROBOT_HOME=$RC_DATA/$EMBODIMENT RC_NORMSTATS_WORKERS=${WORKERS:-16} \
+    LD_LIBRARY_PATH=$RC_ENVS/ffmpeg7/lib:$LD_LIBRARY_PATH HF_LEROBOT_HOME=$RC_DATA/$EMBODIMENT RC_NORMSTATS_WORKERS=${WORKERS:-16} \
       "$RC_ENVS/openpi/bin/python" "$RC_ROOT/configs/openpi/run.py" scripts/compute_norm_stats.py --config-name pi05_yam;;
   lingbot)
     source "$RC_ROOT/scripts/train/lingbot_env.sh"
