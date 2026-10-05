@@ -1,8 +1,10 @@
 """Write the HF model card (README.md) for one run. Epoch-level info only (no step counts).
 usage: python scripts/export/model_card.py <model> <task> <wall_time> <out.md>
+env: CARD_NGPU=4 CARD_GPU="H100" (hardware the run was trained on; per-GPU batch = GBS / CARD_NGPU)
 """
 import json
 import os
+import re
 import sys
 
 model, task, wall, out = sys.argv[1:5]
@@ -38,13 +40,15 @@ R = {
                 "use as `--model_path` with the lingbot-vla-v2 inference code, together with `--norm_stats_file norm_stats.json`"),
 }
 name, base, trained, optim, files, load = R[model]
+ngpu, gpu = int(os.environ.get("CARD_NGPU", 4)), os.environ.get("CARD_GPU", "H100")
+optim = re.sub(r"GBS (\d+) \(\d+/GPU x 4\)", lambda m: f"GBS {m[1]} ({int(m[1]) // ngpu}/GPU x {ngpu})", optim)
 open(out, "w").write(f"""# {name} — {emb} {task}
 
 - **Task:** "{tasks_hint.get(task, task)}" — {info['total_episodes']} episodes, {info['total_frames']:,} frames @ {info['fps']} fps (`RoboColosseum/BimanualYAM-datasets/{task}`)
 - **Inputs/outputs:** cameras top / left wrist / right wrist + instruction; 14-D absolute joint state and action
 - **Base:** {base}
 - **Trained:** {trained}
-- **Optim:** {optim}; 5 epochs; fp32 master weights, bf16 compute; 4x H100; wall time {wall}
+- **Optim:** {optim}; 5 epochs; fp32 master weights, bf16 compute; {ngpu}x {gpu}; wall time {wall}
 - **Files:** {files}
 - **Load:** {load}
 - **Code:** RoboColosseum harness (`scripts/train/{model}.sh`); logs in W&B project `RoboColosseum`
