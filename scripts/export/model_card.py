@@ -11,7 +11,7 @@ model, task, wall, out = sys.argv[1:5]
 emb = os.environ.get("EMBODIMENT", "BimanualYAM")
 info = json.load(open(f"{os.environ['RC_DATA']}/{emb}/{task}/meta/info.json"))
 tasks_hint = {"Dustpan": "Clean the table.", "Cups": "Stack the cups.", "Drawer": "Put the cup into the drawer.",
-              "Microwave": "Open the microwave and take out the bowl."}
+              "Microwave": "Open the microwave and take out the bowl.", "Tray": "Clean the table."}
 R = {
     "gr00t": ("GR00T N1.7", "`nvidia/GR00T-N1.7-3B` (Isaac-GR00T)",
               "Full fine-tune: VLM backbone (LLM + vision) unfrozen + action head",
