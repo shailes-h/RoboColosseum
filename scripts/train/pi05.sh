@@ -10,7 +10,9 @@ LR=$(scale 2.5e-5 64); WARM=$(rc_py "min(1000, $STEPS // 2)")   # recipe warmup,
 echo "RUN=$RUN GBS=$GBS LR=$LR STEPS=$STEPS SAVE_EVERY=$SAVE"
 cd "$RC_TP/openpi"
 export HF_LEROBOT_HOME=$RC_DATA/$EMBODIMENT XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
-export LD_LIBRARY_PATH=$RC_ENVS/ffmpeg7/lib:$LD_LIBRARY_PATH   # torchcodec needs FFmpeg 7 (no system FFmpeg on some clusters)
+# torchcodec needs FFmpeg libs; use the ffmpeg7 env only where the node has none (mixing it with system FFmpeg 4 killed
+# the data-loader workers on crane6 and hung the run)
+ldconfig -p | grep -q libavutil || export LD_LIBRARY_PATH=$RC_ENVS/ffmpeg7/lib:$LD_LIBRARY_PATH
 "$RC_ENVS/openpi/bin/python" "$RC_ROOT/configs/openpi/run.py" scripts/train.py pi05_yam \
   --exp-name "$RUN" --project-name "$WANDB_PROJECT" --overwrite \
   --checkpoint-base-dir "$RC_OUTPUTS/pi05" \
