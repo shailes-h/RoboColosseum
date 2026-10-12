@@ -1,7 +1,7 @@
-"""Build a joint-space-only copy of a BimanualYAM LeRobot v3.0 dataset.
+"""Build a joint-space-only copy of a LeRobot v3.0 dataset.
 
-observation.state <- observation.state_joint_angles (14)
-action            <- action_joint_angles (14)
+BimanualYAM: observation.state <- observation.state_joint_angles (14), action <- action_joint_angles (14).
+DROID: state/action are already joints (8); observation.cartesian_position is dropped.
 EEF columns are dropped; videos are symlinked (relative link, not copied).
 usage: make_joint_dataset.py <src> <dst>
 """
@@ -17,7 +17,7 @@ import pyarrow.parquet as pq
 SRC = Path(sys.argv[1])
 DST = Path(sys.argv[2])
 RENAME = {"observation.state_joint_angles": "observation.state", "action_joint_angles": "action"}
-DROP = {"observation.state_eef_absolute", "action_eef_absolute", "action_eef_delta"}
+DROP = {"observation.state_eef_absolute", "action_eef_absolute", "action_eef_delta", "observation.cartesian_position"}
 
 
 def fix_name(name: str) -> str | None:

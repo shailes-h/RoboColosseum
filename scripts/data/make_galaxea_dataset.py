@@ -1,8 +1,10 @@
-"""Galaxea R1Lite-style copy of Dustpan_joint (LeRobot v3.0).
+"""Galaxea R1Lite-style copy of a <TASK>_joint dataset (LeRobot v3.0).
 
-Splits 14-D joint state/action into per-part columns and renames cameras to
+Splits joint state/action into per-part columns and renames cameras to
 R1Lite keys so GalaxeaVLA's stock GalaxeaLerobotDataset + r1lite-style config work.
-usage: make_galaxea_dataset.py <src Dustpan_joint> <dst>
+BimanualYAM (14-D, 3 cams) or DROID / Franka (8-D: right_arm + right_gripper; left_image + wrist, right_image unused),
+picked from info.json robot_type.
+usage: make_galaxea_dataset.py <src <TASK>_joint> <dst>
 """
 import json
 import os
@@ -14,12 +16,20 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-SRC = Path(sys.argv[1])  # Dustpan_joint
+SRC = Path(sys.argv[1])  # <TASK>_joint
 DST = Path(sys.argv[2])
-PARTS = {"left_arm": (0, 6), "left_gripper": (6, 7), "right_arm": (7, 13), "right_gripper": (13, 14)}
-CAMS = {"observation.images.top": "observation.images.head_rgb",
-        "observation.images.left": "observation.images.left_wrist_rgb",
-        "observation.images.right": "observation.images.right_wrist_rgb"}
+if json.loads((SRC / "meta" / "info.json").read_text()).get("robot_type") == "franka":  # DROID
+    PARTS = {"right_arm": (0, 7), "right_gripper": (7, 8)}
+    CAMS = {"observation.images.left_image": "observation.images.head_rgb",
+            "observation.images.wrist": "observation.images.left_wrist_rgb"}
+    UNUSED = {"observation.images.right_image"}
+else:  # BimanualYAM
+    PARTS = {"left_arm": (0, 6), "left_gripper": (6, 7), "right_arm": (7, 13), "right_gripper": (13, 14)}
+    CAMS = {"observation.images.top": "observation.images.head_rgb",
+            "observation.images.left": "observation.images.left_wrist_rgb",
+            "observation.images.right": "observation.images.right_wrist_rgb"}
+    UNUSED = set()
+DIM = max(b for _, b in PARTS.values())
 
 
 def split_names(base):
@@ -55,7 +65,8 @@ for p in (SRC / "data").rglob("*.parquet"):
 for p in (SRC / "meta" / "episodes").rglob("*.parquet"):
     t = pq.read_table(p)
     keep = [(rename_meta_col(n), c) for n, c in zip(t.column_names, t.columns)
-            if not (n.startswith("stats/observation.state/") or n.startswith("stats/action/"))]
+            if not (n.startswith("stats/observation.state/") or n.startswith("stats/action/"))
+            and not any(u in n for u in UNUSED)]
     out = DST / p.relative_to(SRC)
     out.parent.mkdir(parents=True, exist_ok=True)
     pq.write_table(pa.table([c for _, c in keep], names=[n for n, _ in keep]), out)
@@ -64,6 +75,8 @@ shutil.copy(SRC / "meta" / "tasks.parquet", DST / "meta" / "tasks.parquet")
 info = json.loads((SRC / "meta" / "info.json").read_text())
 feats = {}
 for k, v in info["features"].items():
+    if k in UNUSED:
+        continue
     if k in ("observation.state", "action"):
         for name, (a, b) in split_names(k).items():
             feats[name] = {"dtype": "float32", "shape": [b - a], "names": v["names"][a:b]}
@@ -76,9 +89,11 @@ info["features"] = feats
 stats = json.loads((SRC / "meta" / "stats.json").read_text())
 new_stats = {}
 for k, v in stats.items():
+    if k in UNUSED:
+        continue
     if k in ("observation.state", "action"):
         for name, (a, b) in split_names(k).items():
-            new_stats[name] = {s: (x[a:b] if isinstance(x, list) and len(x) == 14 else x) for s, x in v.items()}
+            new_stats[name] = {s: (x[a:b] if isinstance(x, list) and len(x) == DIM else x) for s, x in v.items()}
     else:
         new_stats[CAMS.get(k, k)] = v
 (DST / "meta" / "stats.json").write_text(json.dumps(new_stats, indent=4))
