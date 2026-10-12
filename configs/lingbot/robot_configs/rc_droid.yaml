@@ -1,0 +1,40 @@
+# RoboColosseum DROID (<TASK>_joint, Franka: 7 joints + gripper). Template, see ../rc_droid.yaml. Same recipe as yam.yaml
+# (arm relative to state, gripper absolute). Image slots follow the camera order left, right, wrist.
+states:
+  - observation.state.arm.position:
+      origin_keys:
+        - observation.state:
+            start: 0
+            end: 7
+
+  - observation.state.effector.position:
+      origin_keys:
+        - observation.state:
+            start: 7
+            end: 8
+
+actions:
+  - action.arm.position:
+      origin_keys:
+          - action:
+              start: 0
+              end: 7
+      subtract_state: True
+      relative_type: joint  # plain action - state (default 'quaternion_local' is for EE poses only)
+
+  - action.effector.position:
+      origin_keys:
+          - action:
+              start: 7
+              end: 8
+      subtract_state: False
+
+images:
+  - observation.images.camera_top:
+      origin_keys: observation.images.left_image
+  - observation.images.camera_wrist_left:
+      origin_keys: observation.images.right_image
+  - observation.images.camera_wrist_right:
+      origin_keys: observation.images.wrist
+
+norm_stats: ${RC_OUTPUTS}/norm_stats/lingbot/rc_droid_${TASK}.json
