@@ -23,5 +23,7 @@ export CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS:-$RC_CACHE/conda_pkgs}
 export NUMPY_MADVISE_HUGEPAGE=0
 
 rc_ds() { echo "$RC_DATA/$EMBODIMENT/$TASK${1:+_$1}"; }   # dataset dir; rc_ds joint -> .../Dustpan_joint
+rc_cfg() { case $EMBODIMENT in DROID) echo rc_droid;; *) echo yam;; esac; }   # config name per embodiment (configs/<repo>/)
+rc_pi_cfg() { case $EMBODIMENT in DROID) echo pi05_droid_joint;; *) echo pi05_yam;; esac; }   # configs/openpi/yam.py
 rc_ngpus() { echo "$1" | tr ',' '\n' | wc -l; }           # "0,1,2,3" -> 4
 rc_py() { python3 -c "import math; print($1)"; }          # tiny arithmetic helper

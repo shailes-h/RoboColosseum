@@ -13,7 +13,7 @@ export HF_LEROBOT_HOME=$RC_DATA/$EMBODIMENT XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
 # torchcodec needs FFmpeg libs; use the ffmpeg7 env only where the node has none (mixing it with system FFmpeg 4 killed
 # the data-loader workers on crane6 and hung the run)
 ldconfig -p | grep -q libavutil || export LD_LIBRARY_PATH=$RC_ENVS/ffmpeg7/lib:$LD_LIBRARY_PATH
-"$RC_ENVS/openpi/bin/python" "$RC_ROOT/configs/openpi/run.py" scripts/train.py pi05_yam \
+"$RC_ENVS/openpi/bin/python" "$RC_ROOT/configs/openpi/run.py" scripts/train.py $(rc_pi_cfg) \
   --exp-name "$RUN" --project-name "$WANDB_PROJECT" --overwrite \
   --checkpoint-base-dir "$RC_OUTPUTS/pi05" \
   --batch-size $GBS --num-train-steps $STEPS --fsdp-devices ${FSDP:-$NGPU} --num-workers 8 \

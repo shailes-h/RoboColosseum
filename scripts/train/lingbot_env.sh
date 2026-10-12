@@ -6,9 +6,10 @@ export LINGBOT_DIR=$($HF download robbyant/lingbot-vla-v2-6b --quiet) QWEN3VL_DI
        MOGE_DIR=$($HF download Ruicheng/moge-2-vitb-normal --quiet)
 G=$RC_OUTPUTS/configs/lingbot; mkdir -p "$G/robot_configs"
 render() { python3 -c "import os,sys; open(sys.argv[2],'w').write(os.path.expandvars(open(sys.argv[1]).read()))" "$1" "$2"; }
-render "$RC_ROOT/configs/lingbot/yam.yaml" "$G/yam.yaml"
-render "$RC_ROOT/configs/lingbot/robot_configs/yam.yaml" "$G/robot_configs/yam.yaml"
-CFG=$G/yam.yaml
+C=$(rc_cfg)
+render "$RC_ROOT/configs/lingbot/$C.yaml" "$G/$C.yaml"
+render "$RC_ROOT/configs/lingbot/robot_configs/$C.yaml" "$G/robot_configs/$C.yaml"
+CFG=$G/$C.yaml
 NPP=$(ls -d "$RC_ENVS"/lingbot/lib/python3*/site-packages/nvidia/npp/lib)
 export LD_LIBRARY_PATH=$NPP:$RC_ENVS/ffmpeg7/lib:$LD_LIBRARY_PATH   # torchcodec needs FFmpeg 7
 export MASTER_PORT=${MASTER_PORT:-62610} WANDB_NAME=${RUN:-lingbot}

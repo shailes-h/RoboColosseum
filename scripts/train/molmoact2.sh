@@ -14,7 +14,7 @@ export WANDB_API_KEY=${WANDB_API_KEY:-$(awk '/api.wandb.ai/{f=1} f&&/password/{p
 mkdir -p "$MOLMO_DATA_DIR"
 cd "$RC_TP/molmoact2/experiments"
 "$RC_ENVS/molmoact2/bin/torchrun" --standalone --nproc-per-node=$NGPU "$RC_ROOT/configs/molmoact2/train.py" \
-  allenai/MolmoAct2 yam \
+  allenai/MolmoAct2 $CFG \
   --wandb.name="$RUN" ${WANDB_ENTITY:+--wandb.entity=$WANDB_ENTITY} --wandb.project="$WANDB_PROJECT" \
   --max_duration=$STEPS --device_batch_size=${DEVICE_BS:-$BS} --global_batch_size=$GBS \
   --num_workers=8 --pin_memory=true --data.timeout=900 \

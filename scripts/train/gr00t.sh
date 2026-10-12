@@ -15,7 +15,7 @@ cd "$RC_TP/Isaac-GR00T"
   --base-model-path nvidia/GR00T-N1.7-3B \
   --dataset-path "$(rc_ds joint_v21_gr00t)" \
   --embodiment-tag NEW_EMBODIMENT \
-  --modality-config-path "$RC_ROOT/configs/gr00t/yam_config.py" \
+  --modality-config-path "$RC_ROOT/configs/gr00t/${CFG}_config.py" \
   --num-gpus $NGPU --output-dir "$OUT" --experiment-name "$RUN" \
   --max-steps $STEPS --save-steps $SAVE --save-total-limit $KEEP \
   --global-batch-size $((BS * NGPU)) --gradient-accumulation-steps $ACC --learning-rate $LR --dataloader-num-workers 8 \

@@ -10,6 +10,9 @@ STEPS=$(rc_py "math.ceil($EPOCHS * $FRAMES / $GBS)"); SAVE=$(rc_py "math.ceil($F
 KEEP=$(rc_py "math.ceil($EPOCHS) + 1")   # checkpoints to keep (one per epoch, plus slack)
 RUN=${RUN:-$MODEL-$(echo "$EMBODIMENT-$TASK" | tr 'A-Z' 'a-z')-gbs$GBS${RUN_SUFFIX}}
 OUT=$RC_OUTPUTS/$MODEL/$RUN
-scale() { rc_py "$1 * $GBS / $2"; }   # scale <recipe_lr> <recipe_gbs>: linear LR scaling with the effective batch
+# scale <recipe_lr> <recipe_gbs>: linear LR scaling with the effective batch, or with LR_GBS if set (keeps the LR of an
+# earlier run at another batch size, e.g. LR_GBS=64 reproduces the BimanualYAM LRs at GBS 32)
+scale() { rc_py "$1 * ${LR_GBS:-$GBS} / $2"; }
+CFG=$(rc_cfg)   # per-embodiment config name under configs/<repo>/
 export CUDA_VISIBLE_DEVICES=$GPUS
 mkdir -p "$RC_OUTPUTS/$MODEL"

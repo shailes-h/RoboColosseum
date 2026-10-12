@@ -14,7 +14,7 @@ cd "$RC_TP/GalaxeaVLA"
 # our task/data yamls are added through hydra.searchpath instead.
 export HYDRA_FULL_ERROR=1 OC_CAUSE=1 HF_HUB_OFFLINE=0 TOKENIZERS_PARALLELISM=false PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export PYTHONPATH=$PWD:$PYTHONPATH G05_OUTPUT_DIR=$RC_OUTPUTS/g05 EXP_NAME=$RUN
-python -m torch.distributed.run --standalone --nnodes 1 --nproc-per-node $NGPU scripts/finetune.py task=yam \
+python -m torch.distributed.run --standalone --nnodes 1 --nproc-per-node $NGPU scripts/finetune.py task=$CFG \
   "hydra.searchpath=[file://$RC_ROOT/configs/galaxea]" \
   model.pretrained_ckpt=$G05/g05-base/checkpoints/model_state_dict.pt \
   model.model_arch.hf_processor_path=$G05/qwen3_5_2b_base_processor \
