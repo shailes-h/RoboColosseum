@@ -1,6 +1,6 @@
 """Upload the final checkpoint of one run (inference files only) to the HF model repo under <model>/<task>/.
 
-usage: python scripts/export/upload_hf.py <model> <run_dir> <task> <model_card.md> [--repo RoboColosseum/BimanualYAM-models]
+usage: python scripts/export/upload_hf.py <model> <run_dir> <task> <model_card.md> [--repo RoboColosseum/<EMBODIMENT>-models]
   model: gr00t | pi05 | g05 | molmoact2 | lingbot
   MolmoAct2: convert first (scripts/export/molmoact2_to_hf.sh <run_dir>/<last step> <run_dir>/hf_final).
 """
@@ -28,26 +28,31 @@ def num(p):
 ROOT = Path(__file__).resolve().parents[2]
 
 
+EMB = os.environ.get("EMBODIMENT", "BimanualYAM")
+CFG = "rc_droid" if EMB == "DROID" else "yam"                  # env.sh rc_cfg
+PI_CFG, PI_VAR = ("pi05_droid_joint", "PI05_DROID") if EMB == "DROID" else ("pi05_yam", "PI05_YAM")
+
+
 def add_eval_files(model, run, task, put):
     """Small files the eval side needs to load the checkpoint without this repo's runtime plumbing."""
     t = task.lower()
     if model == "gr00t":
-        put(ROOT / "configs/gr00t/yam_config.py", "yam_config.py")
-        put(ROOT / "configs/gr00t/yam_modality.json", "yam_modality.json")
+        put(ROOT / f"configs/gr00t/{CFG}_config.py", f"{CFG}_config.py")
+        put(ROOT / f"configs/gr00t/{CFG}_modality.json", f"{CFG}_modality.json")
     elif model == "g05":  # fully composed hydra config of the run
         put(run / ".hydra/config.yaml", ".hydra/config.yaml")
         put(run / ".hydra/overrides.yaml", ".hydra/overrides.yaml")
-    elif model == "lingbot":  # 14-D YAM -> 55-D LingBot mapping, norm stats pointing at the file next to it
-        txt = (ROOT / "configs/lingbot/robot_configs/yam.yaml").read_text()
+    elif model == "lingbot":  # robot joints -> 55-D LingBot mapping, norm stats pointing at the file next to it
+        txt = (ROOT / f"configs/lingbot/robot_configs/{CFG}.yaml").read_text()
         txt = re.sub(r"(?m)^norm_stats: .*$", "norm_stats: norm_stats.json  # the norm_stats.json in this folder", txt)
-        put(txt.encode(), f"robot_config_yam_{t}.yaml")
+        put(txt.encode(), f"robot_config_{CFG}_{t}.yaml")
         put(run / "lingbotvla_cli.yaml", "lingbotvla_cli.yaml")  # full training CLI config (the loader reads it)
     elif model == "pi05":  # standalone TrainConfig (configs/openpi/yam.py without the runtime registration)
         txt = (ROOT / "configs/openpi/yam.py").read_text()
         txt = txt.replace('TASK = os.environ.get("TASK", "Dustpan")', f'TASK = "{task}"')
-        txt = txt.replace('name="pi05_yam"', f'name="pi05_yam_{t}"')
+        txt = txt.replace(f'name="{PI_CFG}"', f'name="{PI_CFG}_{t}"')
         txt = re.sub(r'(?m)^    assets_base_dir=.*\n', "", txt)  # norm stats come from the checkpoint's assets/
-        txt = txt.split("\n\ndef register():")[0] + "\n\nCONFIG = PI05_YAM  # create_trained_policy(CONFIG, <this folder>)\n"
+        txt = txt.split("\n\ndef register():")[0] + f"\n\nCONFIG = {PI_VAR}  # create_trained_policy(CONFIG, <this folder>)\n"
         put(txt.encode(), "train_config.py")
 
 
@@ -57,7 +62,7 @@ def main():
     ap.add_argument("run_dir", type=Path)
     ap.add_argument("task")
     ap.add_argument("card", type=Path)
-    ap.add_argument("--repo", default="RoboColosseum/BimanualYAM-models")
+    ap.add_argument("--repo", default=f"RoboColosseum/{EMB}-models")
     a = ap.parse_args()
     api, run, dst = HfApi(), a.run_dir.resolve(), f"{HF_FOLDER[a.model]}/{a.task.lower()}"
     up = lambda **kw: api.upload_folder(repo_id=a.repo, path_in_repo=dst, **kw)  # noqa: E731
@@ -78,7 +83,7 @@ def main():
     elif a.model == "lingbot":
         ck = last(list((run / "checkpoints").glob("global_step_*")), num)
         up(folder_path=str(ck / "hf_ckpt"))
-        put(Path(os.environ["RC_OUTPUTS"]) / "norm_stats" / "lingbot" / f"yam_{a.task}.json", "norm_stats.json")
+        put(Path(os.environ["RC_OUTPUTS"]) / "norm_stats" / "lingbot" / f"{CFG}_{a.task}.json", "norm_stats.json")
     add_eval_files(a.model, run, a.task, put)
     put(a.card, "README.md")
     print(f"UPLOAD_OK {a.repo}/{dst}")

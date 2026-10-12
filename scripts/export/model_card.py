@@ -39,13 +39,36 @@ R = {
                 "Final checkpoint in HF format plus `norm_stats.json` (meanstd).",
                 "use as `--model_path` with the lingbot-vla-v2 inference code, together with `--norm_stats_file norm_stats.json`"),
 }
+if emb == "DROID":  # same recipes and LRs as BimanualYAM, at half the GBS (2 GPUs); configs rc_droid / pi05_droid_joint
+    tasks_hint.update({"MugOnCoaster": "mug on coaster", "CloseLaptop": "close laptop"})
+    DROID_OPTIM = {
+        "gr00t": "AdamW, LR 1e-4 (same as BimanualYAM), cosine, 5% warmup; GBS 32 (16/GPU x 2)",
+        "pi05": "AdamW, cosine, peak LR 2.5e-5 → 2.5e-6 (same as BimanualYAM), 1k warmup; GBS 32 (16/GPU x 2)",
+        "g05": "LR 4e-5, cosine, warmup 200, wd 0.03; GBS 16 (8/GPU x 2)",
+        "molmoact2": "LLM LR 2e-5, ViT/connector 1e-5, action expert 1e-4 (same as BimanualYAM), warmup, decay to 0.1x; GBS 64 (32/GPU x 2)",
+        "lingbot": "Muon, constant LR 1.25e-5 (same as BimanualYAM); GBS 32 (16/GPU x 2)",
+    }
+    CAMS = {"gr00t": "left exterior / wrist", "pi05": "left exterior / wrist", "g05": "left exterior / wrist",
+            "molmoact2": "left exterior / right exterior / wrist", "lingbot": "left exterior / right exterior / wrist"}
+    SRC = {"MugOnCoaster": "aarontung/droid-mug-on-coaster", "CloseLaptop": "aarontung/droid-close-laptop"}
+    n, b, tr, _, f, ld = R[model]
+    ld = ld.replace("pi05_yam", "pi05_droid_joint").replace("yam_config.py", "rc_droid_config.py").replace("BimanualYAM", "DROID") \
+        .replace("configs/galaxea/task/yam.yaml", "configs/galaxea/task/rc_droid.yaml").replace("configs/openpi/yam.py", "configs/openpi/yam.py (PI05_DROID)")
+    tr = tr.replace("config `pi05_yam`, recipe of `pi05_aloha_pen_uncap`, `adapt_to_pi=False`", "config `pi05_droid_joint`, openpi DroidInputs, joints as deltas")
+    R[model] = (n, b, tr, DROID_OPTIM[model], f, ld)
+    io = f"cameras {CAMS[model]} + instruction; 8-D absolute joint state and action (7 Franka joints + gripper)"
+    src = SRC.get(task, task)
+else:
+    io = "cameras top / left wrist / right wrist + instruction; 14-D absolute joint state and action"
+    src = f"RoboColosseum/BimanualYAM-datasets/{task}"
 name, base, trained, optim, files, load = R[model]
 ngpu, gpu = int(os.environ.get("CARD_NGPU", 4)), os.environ.get("CARD_GPU", "H100")
-optim = re.sub(r"GBS (\d+) \(\d+/GPU x 4\)", lambda m: f"GBS {m[1]} ({int(m[1]) // ngpu}/GPU x {ngpu})", optim)
+if emb != "DROID":
+    optim = re.sub(r"GBS (\d+) \(\d+/GPU x 4\)", lambda m: f"GBS {m[1]} ({int(m[1]) // ngpu}/GPU x {ngpu})", optim)
 open(out, "w").write(f"""# {name} — {emb} {task}
 
-- **Task:** "{tasks_hint.get(task, task)}" — {info['total_episodes']} episodes, {info['total_frames']:,} frames @ {info['fps']} fps (`RoboColosseum/BimanualYAM-datasets/{task}`)
-- **Inputs/outputs:** cameras top / left wrist / right wrist + instruction; 14-D absolute joint state and action
+- **Task:** "{tasks_hint.get(task, task)}" — {info['total_episodes']} episodes, {info['total_frames']:,} frames @ {info['fps']} fps (`{src}`)
+- **Inputs/outputs:** {io}
 - **Base:** {base}
 - **Trained:** {trained}
 - **Optim:** {optim}; 5 epochs; fp32 master weights, bf16 compute; {ngpu}x {gpu}; wall time {wall}
